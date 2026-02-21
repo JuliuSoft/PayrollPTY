@@ -6,4 +6,17 @@ On-prem single-company payroll system for Panama with deterministic engine + aud
 - `frontend/` React + TypeScript + Recharts.
 - `docs/` architecture, runbook, payroll rules.
 
-See `docs/runbook.md` for setup.
+## Quick answer: how to generate database objects
+```bash
+cd backend/Payroll.Api
+dotnet restore
+dotnet ef migrations add InitialCreate --project ../Payroll.Infrastructure --startup-project .
+dotnet ef database update --project ../Payroll.Infrastructure --startup-project .
+```
+
+To generate a SQL deployment script instead:
+```bash
+dotnet ef migrations script --project ../Payroll.Infrastructure --startup-project . --output ./migrations.sql
+```
+
+See `docs/runbook.md` for complete setup.
