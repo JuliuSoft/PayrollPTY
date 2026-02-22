@@ -1,1 +1,13 @@
-body{font-family:Arial;margin:0;background:#f6f8fb} .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.sidebar{background:#0b1f3a;color:#fff;padding:16px}.sidebar a{display:block;color:#fff;padding:6px 0}.content{padding:16px}.card{background:#fff;padding:12px;border-radius:8px;margin-bottom:12px}.badge{padding:2px 8px;border-radius:10px;background:#e2e8f0}
+body{font-family:Arial;margin:0;background:#f6f8fb}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{background:#0b1f3a;color:#fff;padding:16px}
+.sidebar a{display:block;color:#fff;padding:6px 0;text-decoration:none}
+.content{padding:16px}
+.card{background:#fff;padding:12px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.badge{padding:2px 8px;border-radius:10px;background:#e2e8f0}
+.table{width:100%;border-collapse:collapse}.table th,.table td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.error{color:#b91c1c}
+button{margin-left:8px}
+input,select{margin:0 8px;padding:4px}
