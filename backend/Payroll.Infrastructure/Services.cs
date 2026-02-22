@@ -13,7 +13,7 @@ public class AuthService(PayrollDbContext db, IConfiguration config) : IAuthServ
     public async Task<string?> Login(string username, string password) {
         var user = await db.Users.FirstOrDefaultAsync(x=>x.Username==username);
         if (user is null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)) return null;
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"] ?? "dev-secret-key-very-long"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"] ?? "dev-secret-key-very-long-32-bytes-minimum!!"));
         var token = new JwtSecurityToken(claims: [new Claim(ClaimTypes.Name,user.Username), new Claim(ClaimTypes.Role,user.Role)], expires: DateTime.UtcNow.AddHours(8), signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
