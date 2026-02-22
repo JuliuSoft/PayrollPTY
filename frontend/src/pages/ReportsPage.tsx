@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import api from '../api/client';
 
@@ -50,8 +51,17 @@ export default function ReportsPage() {
         setDeductions([]);
         setTop([]);
       }
-    } catch {
-      setError('Could not load report data. Verify backend is running and your user has Finance/Auditor/PayrollAdmin role.');
+    } catch (err) {
+      let msg = 'Could not load report data.';
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        const backendMessage = (err.response?.data as any)?.error || err.response?.statusText;
+        if (status === 401) msg = 'Unauthorized (401). Please login again.';
+        else if (status === 403) msg = 'Forbidden (403). Your user role cannot access reports.';
+        else if (status === 500) msg = `Server error (500): ${backendMessage || 'check backend logs for details.'}`;
+        else msg = `Request failed${status ? ` (${status})` : ''}${backendMessage ? `: ${backendMessage}` : ''}`;
+      }
+      setError(msg);
       setCost([]);
       setGrossNet([]);
       setDeductions([]);

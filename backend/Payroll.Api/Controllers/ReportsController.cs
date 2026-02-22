@@ -9,7 +9,7 @@ namespace Payroll.Api.Controllers;
 
 [ApiController]
 [Route("reports")]
-[Authorize(Roles = "PayrollAdmin,Finance,Auditor")]
+[Authorize(Roles = "PayrollAdmin,Finance,Auditor,HR")]
 public class ReportsController(PayrollDbContext db) : ControllerBase {
     [HttpGet("payroll-cost")]
     public async Task<IActionResult> PayrollCost([FromQuery] DateOnly from, [FromQuery] DateOnly to) {
