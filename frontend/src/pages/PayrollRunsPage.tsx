@@ -12,6 +12,13 @@ export default function PayrollRunsPage() {
 
   const loadRuns = () => api.get('/payroll-runs').then(r => setRuns(r.data));
 
+  const statusLabel = (status: any) => {
+    const map: Record<string, string> = { '0': 'Draft', '1': 'Validated', '2': 'Preview', '3': 'Approved', '4': 'Locked' };
+    return map[String(status)] || String(status);
+  };
+
+  const isLocked = (status: any) => String(status) === '4' || String(status).toLowerCase() === 'locked';
+
   const loadResults = async (runId: string) => {
     const r = await api.get(`/payroll-runs/${runId}/results`);
     setResults(r.data);
@@ -52,11 +59,11 @@ export default function PayrollRunsPage() {
         <tbody>
           {runs.map(r => <tr key={r.id}>
             <td>{r.runType}</td>
-            <td><span className='badge'>{r.status}</span></td>
+            <td><span className='badge'>{statusLabel(r.status)}</span></td>
             <td>{r.createdBy}</td>
             <td>{new Date(r.createdAt).toLocaleString()}</td>
             <td>
-              <button onClick={() => preview(r.id)} disabled={r.status === 'Locked' || loadingRun === r.id}>
+              <button onClick={() => preview(r.id)} disabled={isLocked(r.status) || loadingRun === r.id}>
                 {loadingRun === r.id ? 'Processing...' : 'Preview'}
               </button>
             </td>
