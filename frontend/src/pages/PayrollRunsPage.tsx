@@ -4,6 +4,8 @@ import api from '../api/client';
 
 export default function PayrollRunsPage() {
   const [runs, setRuns] = useState<any[]>([]);
+  const [periods, setPeriods] = useState<any[]>([]);
+  const [periodId, setPeriodId] = useState('');
   const [selectedRunId, setSelectedRunId] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [loadingRun, setLoadingRun] = useState('');
@@ -11,6 +13,7 @@ export default function PayrollRunsPage() {
   const [error, setError] = useState('');
 
   const loadRuns = () => api.get('/payroll-runs').then(r => setRuns(r.data));
+  const loadPeriods = () => api.get('/pay-periods').then(r => { setPeriods(r.data); if (!periodId && r.data.length) setPeriodId(r.data[0].id); });
 
   const statusLabel = (status: any) => {
     const map: Record<string, string> = { '0': 'Draft', '1': 'Validated', '2': 'Preview', '3': 'Approved', '4': 'Locked' };
@@ -25,62 +28,52 @@ export default function PayrollRunsPage() {
     setSelectedRunId(runId);
   };
 
-  useEffect(() => { loadRuns(); }, []);
+  useEffect(() => { loadRuns(); loadPeriods(); }, []);
+
+  const createRun = async () => {
+    if (!periodId) return;
+    await api.post('/payroll-runs', { periodId, runType: 0 });
+    await loadRuns();
+    setMessage('Payroll run created.');
+  };
 
   const preview = async (id: string) => {
-    setLoadingRun(id);
-    setMessage('');
-    setError('');
+    setLoadingRun(id); setMessage(''); setError('');
     try {
       const res = await api.post(`/payroll-runs/${id}/preview`);
-      await loadRuns();
-      await loadResults(id);
+      await loadRuns(); await loadResults(id);
       setMessage(`Preview generated for run ${id}. Results: ${res.data?.results ?? results.length}`);
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
         const apiError = (err.response?.data as any)?.error;
         setError(`Preview failed${status ? ` (${status})` : ''}${apiError ? `: ${apiError}` : ''}`);
-      } else {
-        setError('Preview failed due to an unexpected error.');
-      }
-    } finally {
-      setLoadingRun('');
-    }
+      } else setError('Preview failed due to an unexpected error.');
+    } finally { setLoadingRun(''); }
   };
 
   return <div>
     <h2>Payroll Runs</h2>
     <div className='card'>
+      <h4>Payroll Data Entry</h4>
+      <select value={periodId} onChange={e => setPeriodId(e.target.value)}>
+        {periods.map((p:any) => <option key={p.id} value={p.id}>{p.startDate} → {p.endDate}</option>)}
+      </select>
+      <button onClick={createRun}>Create Run</button>
+    </div>
+
+    <div className='card'>
       {message && <p className='success'>{message}</p>}
       {error && <p className='error'>{error}</p>}
       <table className='table'>
         <thead><tr><th>Run Type</th><th>Status</th><th>Created By</th><th>Created At</th><th>Action</th><th>Details</th></tr></thead>
-        <tbody>
-          {runs.map(r => <tr key={r.id}>
-            <td>{r.runType}</td>
-            <td><span className='badge'>{statusLabel(r.status)}</span></td>
-            <td>{r.createdBy}</td>
-            <td>{new Date(r.createdAt).toLocaleString()}</td>
-            <td>
-              <button onClick={() => preview(r.id)} disabled={isLocked(r.status) || loadingRun === r.id}>
-                {loadingRun === r.id ? 'Processing...' : 'Preview'}
-              </button>
-            </td>
-            <td><button onClick={() => loadResults(r.id)}>View Results</button></td>
-          </tr>)}
-        </tbody>
+        <tbody>{runs.map(r => <tr key={r.id}><td>{r.runType}</td><td><span className='badge'>{statusLabel(r.status)}</span></td><td>{r.createdBy}</td><td>{new Date(r.createdAt).toLocaleString()}</td><td><button onClick={() => preview(r.id)} disabled={isLocked(r.status) || loadingRun === r.id}>{loadingRun === r.id ? 'Processing...' : 'Preview'}</button></td><td><button onClick={() => loadResults(r.id)}>View Results</button></td></tr>)}</tbody>
       </table>
     </div>
 
     <div className='card'>
       <h4>Run Results {selectedRunId ? `(${selectedRunId})` : ''}</h4>
-      {results.length === 0 ? <p>No results loaded. Click "View Results" or run Preview.</p> :
-        <table className='table'>
-          <thead><tr><th>EmployeeId</th><th>Gross</th><th>Deductions</th><th>Net</th><th>Employer Cost</th></tr></thead>
-          <tbody>{results.map((x:any) => <tr key={x.id}><td>{x.employeeId}</td><td>{x.gross}</td><td>{x.deductions}</td><td>{x.net}</td><td>{x.employerCostTotal}</td></tr>)}</tbody>
-        </table>
-      }
+      {results.length === 0 ? <p>No results loaded. Click "View Results" or run Preview.</p> : <table className='table'><thead><tr><th>EmployeeId</th><th>Gross</th><th>Deductions</th><th>Net</th><th>Employer Cost</th></tr></thead><tbody>{results.map((x:any) => <tr key={x.id}><td>{x.employeeId}</td><td>{x.gross}</td><td>{x.deductions}</td><td>{x.net}</td><td>{x.employerCostTotal}</td></tr>)}</tbody></table>}
     </div>
   </div>;
 }
