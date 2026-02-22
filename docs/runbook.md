@@ -138,3 +138,10 @@ dotnet tool run dotnet-ef -- migrations add InitialCreate \
 Also verify the startup project is SDK-style (`<Project Sdk=...>`) and restore first:
 - `dotnet restore backend/Payroll.Api/Payroll.Api.csproj`
 - `dotnet restore backend/Payroll.Infrastructure/Payroll.Infrastructure.csproj`
+
+
+## 6) Load sample data (Jan/Feb 2026)
+Run in SQL Server Management Studio against `PayrollPTY`:
+
+- `docs/sql/sample-data-2026-jan-feb.sql`
+- `docs/sql/verify-sample-data-2026-jan-feb.sql` (verification queries)

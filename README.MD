@@ -90,3 +90,8 @@ npm install
 npm run dev
 ```
 Then open the Vite URL (usually `http://localhost:5173`). Keep backend running on `http://localhost:5000`.
+
+
+## SQL sample scripts (Jan/Feb 2026)
+- Seed sample payroll data: `docs/sql/sample-data-2026-jan-feb.sql`
+- Verify loaded data: `docs/sql/verify-sample-data-2026-jan-feb.sql`
