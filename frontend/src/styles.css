@@ -11,3 +11,5 @@ body{font-family:Arial;margin:0;background:#f6f8fb}
 .error{color:#b91c1c}
 button{margin-left:8px}
 input,select{margin:0 8px;padding:4px}
+
+.success{color:#166534;font-weight:600}
