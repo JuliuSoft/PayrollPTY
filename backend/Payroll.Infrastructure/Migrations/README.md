@@ -1,22 +1,19 @@
-# PayrollPTY MVP
-On-prem single-company payroll system for Panama with deterministic engine + audit trail.
+# Migrations / Database Object Generation
 
-## Structure
-- `backend/` .NET 8 Web API + EF Core + SQL Server.
-- `frontend/` React + TypeScript + Recharts.
-- `docs/` architecture, runbook, payroll rules.
-
-## Quick answer: how to generate database objects
-### Option 1 (run inside API folder)
+## Option A: run from `backend/Payroll.Api`
 ```bash
-cd backend/Payroll.Api
 dotnet restore
 dotnet tool restore
 dotnet tool run dotnet-ef -- migrations add InitialCreate --project ../Payroll.Infrastructure --startup-project .
+```
+
+Apply database objects directly:
+
+```bash
 dotnet tool run dotnet-ef -- database update --project ../Payroll.Infrastructure --startup-project .
 ```
 
-### Option 2 (run from repository root)
+## Option B: run from repository root
 ```bash
 dotnet restore backend/Payroll.Api/Payroll.Api.csproj
 dotnet tool restore
@@ -24,26 +21,28 @@ dotnet tool run dotnet-ef -- migrations add InitialCreate --project backend/Payr
 dotnet tool run dotnet-ef -- database update --project backend/Payroll.Infrastructure/Payroll.Infrastructure.csproj --startup-project backend/Payroll.Api/Payroll.Api.csproj
 ```
 
-To generate a SQL deployment script instead:
+Or generate deployable SQL (for DBA-controlled environments):
+
 ```bash
 dotnet tool run dotnet-ef -- migrations script --project backend/Payroll.Infrastructure/Payroll.Infrastructure.csproj --startup-project backend/Payroll.Api/Payroll.Api.csproj --output ./backend/Payroll.Api/migrations.sql
 ```
 
-See `docs/runbook.md` for complete setup.
+The generated script contains CREATE/ALTER statements for tables, indexes, constraints, and EF migration history.
 
-### If you get `No project was found in directory '.'`
-You ran the command from a folder that does not contain a `.csproj` while using `--startup-project .`.
+## Fix for `No project was found in directory '.'`
+`--startup-project .` only works when current directory contains a project file.
+- If you are at repo root, do not use `.`.
+- Use `--startup-project backend/Payroll.Api/Payroll.Api.csproj` instead.
 
-Fix:
-- either run `cd backend/Payroll.Api` first, then keep `--startup-project .`
-- or keep running from root and pass explicit `.csproj` paths (Option 2 above)
+## Fix for `get_LockReleaseBehavior` design-time error
+This error indicates a mismatch between EF runtime/provider/tools versions.
 
-### If you get `get_LockReleaseBehavior` when running migrations
-You likely have mixed EF versions installed. Use the repo-pinned tool and aligned EF packages:
-- `dotnet tool restore`
-- `dotnet tool run dotnet-ef -- --version`
-- `dotnet nuget locals all --clear`
-- `dotnet restore`
+Checklist:
+1. Ensure EF packages are aligned (all `8.0.8` in this repo).
+2. Use local pinned tool (`dotnet tool restore`, then `dotnet tool run dotnet-ef -- ...`).
+3. Clear NuGet caches and restore:
+   - `dotnet nuget locals all --clear`
+   - `dotnet restore`
 
 
 ### If you get: `Your startup project 'Payroll.Api' doesn't reference Microsoft.EntityFrameworkCore.Design`
@@ -79,14 +78,3 @@ dotnet tool run dotnet-ef -- migrations add InitialCreate \
 Also verify the startup project is SDK-style (`<Project Sdk=...>`) and restore first:
 - `dotnet restore backend/Payroll.Api/Payroll.Api.csproj`
 - `dotnet restore backend/Payroll.Infrastructure/Payroll.Infrastructure.csproj`
-
-
-## Frontend on Windows 11 (quick steps)
-```powershell
-cd C:\Users\<your-user>\source\repos\PayrollPTY\frontend
-node -v
-npm -v
-npm install
-npm run dev
-```
-Then open the Vite URL (usually `http://localhost:5173`). Keep backend running on `http://localhost:5000`.

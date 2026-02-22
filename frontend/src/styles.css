@@ -1,0 +1,1 @@
+body{font-family:Arial;margin:0;background:#f6f8fb} .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.sidebar{background:#0b1f3a;color:#fff;padding:16px}.sidebar a{display:block;color:#fff;padding:6px 0}.content{padding:16px}.card{background:#fff;padding:12px;border-radius:8px;margin-bottom:12px}.badge{padding:2px 8px;border-radius:10px;background:#e2e8f0}
